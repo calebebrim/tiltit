@@ -5,7 +5,8 @@ Tiltit is a developer utils to encapsulate the deployment logic of some tools.
 
 # How to use it?
 
-Add this to your main file. It will download the tilt_resource helper at same path as ``tilt_resource.star``. To update this file you just need to delete it, the following script will redownload the latest version:
+Add this to your main Tiltfile. It will download the tilt_resource helper at same path as ``tilt_resource.star``. To update this file you just need to delete it, the following script will redownload the latest version:
+
 ```python
 if not os.path.exists("./tilt_resource.star"):
     # 1. Fetch the raw file from GitHub URL
