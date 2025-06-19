@@ -35,7 +35,7 @@ def tilt_resource(resource_name, repo_url="git@github.com:calebebrim/tiltit.git"
             fi
         '''.format(path=local_repo_path, url=repo_url),
         deps = deps,            # Runs on tilt up
-        labels = labels
+        labels = labels,
         trigger_mode = TRIGGER_MODE_MANUAL,  # Run when manually triggered
     )
     
