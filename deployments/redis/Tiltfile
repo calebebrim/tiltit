@@ -1,0 +1,106 @@
+REDIS_YAML=blob("""
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+data:
+  redis.conf: |
+    # Redis configuration
+    user default on >yourStrongPassword allkeys allcommands
+    # Optional: additional Redis configurations
+    protected-mode yes
+    port 6379
+    # Enable AOF for durability
+    appendonly yes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis/redis-stack:7.4.0-v5
+          env:
+            - name: REDIS_PASSWORD
+              value: "yourStrongPassword"
+            - name: REDIS_ARGS
+              value: "--protected-mode no"
+          ports:
+            - name: "redis" 
+              containerPort: 6379
+            - name: "http"
+              containerPort: 8001
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+            # - name: redis-config
+            #   mountPath: /usr/local/etc/redis/redis.conf
+            #   subPath: redis.conf
+          # command:
+          #   - "redis-server"
+          #   - "--appendonly"
+          #   - "yes"
+      volumes:
+        - name: redis-data
+          emptyDir: {}
+        # - name: redis-config
+        #   configMap:
+        #     name: redis-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+spec:
+  type: ClusterIP
+  ports:
+    - name: "redis"
+      port: 6379
+      targetPort: 6379
+    - port: 8001
+      targetPort: 8001
+      name: "http"
+  selector:
+    app: redis
+""")
+
+def install(labels=[]):
+    
+    k8s_yaml(REDIS_YAML)
+    k8s_resource(
+        'redis', 
+        objects=["redis-config"],
+        port_forwards=[6379, 8001], 
+        labels=labels,
+        trigger_mode=TRIGGER_MODE_MANUAL
+
+    )

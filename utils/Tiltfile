@@ -1,0 +1,51 @@
+def listdir(path):
+    b = local('ls {}'.format(path), quiet=True)
+    files = str(b).split('\n')
+    return files
+
+def helm_install(values_file, name, chart=None, repo_url=None, labels=[], namespace='default', resource_deps = [], deps=[], on_exist='skip'):
+    """ 
+    Install a Helm chart with the specified values file and name.
+    """
+    if repo_url:
+        local('helm repo add myrepo {}'.format(repo_url))
+        local('helm repo update')
+
+    def get_helm_deployment_status(name):
+        """Check if a Helm release is installed."""
+        
+        status = local('helm status {} | grep STATUS'.format(name), quiet=True)
+        return status.strip().split(': ')[1] if status else ""
+            
+    def helm_deployment_present(name):
+        """Check if a Helm release is present."""
+        
+        status = local('if helm list | grep -q {}; then echo "present"; else echo "missing"; fi'.format(name))
+        return str(status).strip()
+
+    status = helm_deployment_present(name)
+    print('Helm status for {}: {}'.format(name, status))
+    if status == 'present':
+        print('Helm release {} already exists, skipping installation.'.format(name))
+        if on_exist == 'skip':
+            return
+        elif on_exist == 'replace':
+            local('helm uninstall {}'.format(name))
+        else:
+            fail('Unknown on_exist option: {}'.format(on_exist))
+            return
+    deps = deps + [values_file]
+    chart = chart or '.'
+    local_resource(
+        'helm_install_{}'.format(name),
+        cmd='helm upgrade --install {} {} --values {} --namespace {}'.format(
+            name, chart, values_file, namespace
+        ),
+        deps=deps,
+        resource_deps=resource_deps,
+        labels=labels
+    )
+    
+    watch_file(values_file)
+    if chart != '.':
+        watch_file(chart)

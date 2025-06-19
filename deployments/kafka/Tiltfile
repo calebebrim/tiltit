@@ -1,0 +1,137 @@
+load('ext://helm_resource', 'helm_resource', 'helm_repo')
+
+
+
+def kafka_storage_yaml(name, storage_class_name="kafka-storage", path="/data/kafkastorage", node_affinity=['worker']):
+  affinity = "\n          - ".join([""]+node_affinity)  
+  return blob("""
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {name}-storage
+spec:
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: {storage_class_name}
+  local:
+    path: {path}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values: {affinity}
+
+""".format(
+  name=name, 
+  storage_class_name=storage_class_name, 
+  path=path,
+  affinity=affinity
+  ))
+
+
+def kafka_yaml(name='kafka', storage_class_name="kafka-storage", replicas=1, debugger=False):
+  tmp = """
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: {name}-nodepool
+  labels:
+    strimzi.io/cluster: {name}-cluster
+spec:
+  replicas: {replicas}
+  roles:
+    - controller
+    - broker
+  storage:
+    type: jbod
+    volumes:
+      - id: 0
+        type: persistent-claim
+        size: 100Gi
+        class: {storage_class_name} # Storage class for Kafka
+        deleteClaim: false
+        kraftMetadata: shared
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 500m
+    limits:
+      memory: 4Gi
+      cpu: 1
+---
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: {name}-cluster
+  annotations:
+    strimzi.io/node-pools: enabled
+    strimzi.io/kraft: enabled
+spec:
+  kafka:
+    version: 4.0.0
+    metadataVersion: 4.0-IV3
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: tls
+        port: 9093
+        type: internal
+        tls: true
+    config:
+      offsets.topic.replication.factor: 1
+      transaction.state.log.replication.factor: 1
+      transaction.state.log.min.isr: 1
+      default.replication.factor: 1
+      min.insync.replicas: 1
+  entityOperator:
+    topicOperator:
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 100m
+        limits:
+          memory: 512Mi
+          cpu: 200m
+    userOperator:
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 100m
+        limits:
+          memory: 512Mi
+          cpu: 200m
+  """.format(
+    name=name, 
+    storage_class_name=storage_class_name,
+    replicas=replicas)
+  if debugger:
+    print(tmp)
+  return blob(tmp)
+
+def install(labels=[], name='kafka'):
+    helm_repo('helm-strimzi-charts', 'https://strimzi.io/charts/', labels=labels)
+    helm_resource('kafka-operator', "strimzi/strimzi-kafka-operator", labels=labels)
+    
+    k8s_yaml(kafka_yaml(name=name, storage_class_name="kafka-storage"))
+    k8s_yaml(kafka_storage_yaml(name, storage_class_name="kafka-storage", node_affinity=["kind-cluster-worker2"]))
+
+    k8s_resource(
+        new_name=name+'-storage',
+        objects=[name+'-storage:persistentvolume'], labels=labels
+    )
+    k8s_resource(
+        new_name=name+"-cluster",
+        objects=[name+"-cluster", name+'-nodepool:kafkanodepool'], 
+        labels=labels,
+        resource_deps=["kafka-storage", "helm-strimzi-charts"]
+    )
+    k8s_resource('kafka-operator', labels=labels)

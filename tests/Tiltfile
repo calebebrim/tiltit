@@ -1,0 +1,11 @@
+load('../Tiltfile', 'install_infra')
+
+
+install_infra(
+    base_path='..',
+    services=[
+        'kafka',
+        'postgres',
+        'redis'
+    ]
+)

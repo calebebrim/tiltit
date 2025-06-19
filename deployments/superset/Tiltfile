@@ -1,0 +1,22 @@
+
+# load("{}/../utils/Tiltfile".format(base_path), helm_install)
+
+def install_superset_helm(labels=[], base_path='.'):
+    """
+    Install Apache Superset using Helm.
+    """
+    # helm_repo('superset-repo', 'https://apache.github.io/superset', labels=['infrastructure'])
+    docker_build(
+        'apache/superset',
+        context='./docker',
+        dockerfile='./docker/superset.dockerfile',
+    )
+
+    helm_install(
+        './k8s/superset-helm-values.yaml', 
+        name="superset", 
+        chart="superset/superset", 
+        repo_url='https://apache.github.io/superset', 
+        on_exist='replace',
+        labels=labels,
+    )
