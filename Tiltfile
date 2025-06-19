@@ -142,6 +142,7 @@ def install_infra(labels, services=[]):
             - minio << not working
             - superset << not working
     """)
+        return
 
     if 'postgres' in services:
         install_postgres(labels)
