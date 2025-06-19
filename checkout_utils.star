@@ -1,7 +1,7 @@
 
 
 
-def tilt_resource(resource_name, repo_url, enable_local_resource=True, tilt_resources_path= "/tmp/tilt/resources"):
+def tilt_resource(resource_name, repo_url="git@github.com:calebebrim/tiltit.git", enable_local_resource=True, tilt_resources_path= "/tmp/tilt/resources"):
     # Define a local resource to clone or update the repo
 
     tilt_resources_path = tilt_resources_path.strip()

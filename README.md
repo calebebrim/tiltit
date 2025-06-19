@@ -1,15 +1,20 @@
 # How to use it?
 
+Add this to the 
 ```python
-load('ext://git_resource', 'git_resource')
+if not os.path.exists("./checkout_utils.star"):
+    # 1. Fetch the raw file from GitHub URL
+  local('curl -L https://raw.githubusercontent.com/calebebrim/tiltit/refs/heads/master/checkout_utils.star -o checkout_utils.star', quiet=True)
 
-repo = git_resource("https://github.com/calebebrim/tiltit.git", ref="master")
+# 2. Load tilt_resource
+load("checkout_utils.star", "tilt_resource")
 
-load(repo.child("Tiltfile"), "install_postgres", "install_kafka", "install_redis", "install_minio", "install_superset", "install_superset_helm", "helm_install", "install_infra")
+#3. Use your Tiltfile 
+tiltit = tilt_resource("tiltit_repo")
 
-# Now use the helpers:
+install_infra = tiltit["install_infra"]
 
-install_infra(labels=["infrastructure"], services=["postgres", "redis", "kafka", "superset_helm"])
+install_infra(labels=[], services=['kafka'])
 ```
 
 # Helper functions
