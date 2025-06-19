@@ -2,12 +2,12 @@
 
 Add this to the 
 ```python
-if not os.path.exists("./checkout_utils.star"):
+if not os.path.exists("./tilt_resource.star"):
     # 1. Fetch the raw file from GitHub URL
-  local('curl -L https://raw.githubusercontent.com/calebebrim/tiltit/refs/heads/master/checkout_utils.star -o checkout_utils.star', quiet=True)
+  local('curl -L https://raw.githubusercontent.com/calebebrim/tiltit/refs/heads/master/tilt_resource.star -o tilt_resource.star', quiet=True)
 
 # 2. Load tilt_resource
-load("checkout_utils.star", "tilt_resource")
+load("tilt_resource.star", "tilt_resource")
 
 #3. Use your Tiltfile 
 tiltit = tilt_resource("tiltit_repo")
