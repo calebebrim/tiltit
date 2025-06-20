@@ -50,7 +50,7 @@ def helm_install(values_file, name, chart=None, repo_url=None, labels=[], namesp
     if chart != '.':
         watch_file(chart)
 
-def sts_yaml(name, image, port, envs = {}):
+def sts_yaml(name, image, port=8080, envs = {}):
     
     env_tpl = "env:{envs}"
     env_value_tpl= """\n            - name: {name}\n              value: {value}"""
