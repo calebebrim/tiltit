@@ -63,7 +63,7 @@ def sts_yaml(name, image, port=8080, envs = {}):
         env_str = env_tpl.format(envs=env_vars_str)
 
 
-    YAML = blob("""
+    return blob("""
 apiVersion: apps/v1
 kind: Deployment
 metadata:
