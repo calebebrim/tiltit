@@ -49,3 +49,57 @@ def helm_install(values_file, name, chart=None, repo_url=None, labels=[], namesp
     watch_file(values_file)
     if chart != '.':
         watch_file(chart)
+
+def sts_yaml(name, image, port, envs: dict[str, str]= {}):
+    
+    env_tpl = "env:{envs}"
+    env_value_tpl= """\n            - name: {name}\n              value: {value}"""
+
+
+    env_values_str = ""
+    env_str = ""
+    if envs.keys():
+        env_vars_str = "\n".join([env_value_tpl.format(env, value) for env, value in envs.items()])
+        env_str = env_tpl.format(envs=env_vars_str)
+
+
+    YAML = blob("""
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {name}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {name}
+  template:
+    metadata:
+      labels:
+        app: {name}
+    spec:
+      containers:
+        - name: {name}
+          image: {image}
+          ports:
+            - containerPort: {port}
+          {env}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {name}
+spec:
+  type: ClusterIP
+  selector:
+    app: {name}
+  ports:
+    - port: {port}
+      targetPort: {port}
+    """.format(
+        name=name,
+        port=port,
+        image=image,
+        env=env_str
+    ))
+
