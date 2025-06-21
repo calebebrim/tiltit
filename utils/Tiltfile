@@ -67,7 +67,7 @@ def sts_yaml(name, image, port=8080, envs = {}, command=None, args=None):
 
     return blob("""
 apiVersion: apps/v1
-kind: Deployment
+kind: Statefulset
 metadata:
   name: {name}
 spec:
