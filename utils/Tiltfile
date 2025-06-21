@@ -7,7 +7,7 @@ def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, l
     """ 
     Install a Helm chart with the specified values file and name.
     """
-    if repo_url & repo_name:
+    if repo_url!=None & repo_name!=None:
         local('helm repo add {} {}'.format(repo_name, repo_url))
         local('helm repo update')
 
