@@ -8,8 +8,10 @@ def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, l
     Install a Helm chart with the specified values file and name.
     """
     if (repo_url!=None) and (repo_name!=None):
-        local('helm repo add {} {}'.format(repo_name, repo_url))
-        local('helm repo update')
+        repos = local("helm repo list | grep {}".format(repo_name))
+        if repo_name not in repos: 
+          local('helm repo add {} {}'.format(repo_name, repo_url))
+          local('helm repo update')
 
     def get_helm_deployment_status(name):
         """Check if a Helm release is installed."""
@@ -26,14 +28,14 @@ def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, l
     status = helm_deployment_present(name)
     print('Helm status for {}: {}'.format(name, status))
     if status == 'present':
-        print('Helm release {} already exists, skipping installation.'.format(name))
         if on_exist == 'skip':
-            return
+          print('Helm release {} already exists, skipping installation.'.format(name))
+          return
         elif on_exist == 'replace':
-            local('helm uninstall {}'.format(name))
+          local('helm uninstall {}'.format(name))
         else:
-            fail('Unknown on_exist option: {}'.format(on_exist))
-            return
+          fail('Unknown on_exist option: {}'.format(on_exist))
+          return
     deps = deps + [values_file]
     chart = chart or '.'
     resource_name = 'helm_install_{}'.format(name)
