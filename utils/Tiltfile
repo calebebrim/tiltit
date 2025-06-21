@@ -67,10 +67,10 @@ def sts_yaml(name, image, ports=[], envs = {}, command=None, args=None, service_
     # map ports
     
 
-    container_ports_str = "\n".join(["            - containerPort: {port}".format(port=port) for port in ports])
+    container_ports_str = "\n".join(["            - containerPort: {port}".format(port=port.split(":")[1]) for port in ports])
     sts_ports_str = """ports:\n{}""".format(container_ports_str) if ports else ""
 
-    svc_ports_str = "ports:\n{}".format("\n".join(["    - port: {port}\n      targetPort: {port}".format(port=port) for port in ports])) if ports and service_enabled else ""
+    svc_ports_str = "ports:\n{}".format("\n".join(["    - port: {port}\n      targetPort: {port}\n      name: {name}".format(port=port.split(":")[1], name=port.split(":")[0]) for port in ports])) if ports and service_enabled else ""
 
 
 
