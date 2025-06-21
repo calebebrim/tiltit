@@ -3,7 +3,7 @@ def listdir(path):
     files = str(b).split('\n')
     return files
 
-def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, labels=[], namespace='default', resource_deps = [], deps=[], on_exist='skip'):
+def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, labels=[], namespace='default', resource_deps = [], deps=[], on_exist='skip', force_repo_update=False):
     """ 
     Install a Helm chart with the specified values file and name.
     """
@@ -11,6 +11,8 @@ def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, l
         repos = local("helm repo list | grep {}".format(repo_name))
         if repo_name not in repos: 
           local('helm repo add {} {}'.format(repo_name, repo_url))
+          local('helm repo update')
+        elif force_repo_update:
           local('helm repo update')
 
     def get_helm_deployment_status(name):
