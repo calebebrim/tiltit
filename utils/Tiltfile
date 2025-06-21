@@ -13,7 +13,10 @@ def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, l
           local('helm repo add {} {}'.format(repo_name, repo_url))
           local('helm repo update')
         elif force_repo_update:
+          print("Force update helm repo {}".format(repo_name))
           local('helm repo update')
+        else:
+          print("Helm repo {} already exists".format(repo_name))
 
     def get_helm_deployment_status(name):
         """Check if a Helm release is installed."""
