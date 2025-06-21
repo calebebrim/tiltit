@@ -3,7 +3,7 @@ def listdir(path):
     files = str(b).split('\n')
     return files
 
-def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, labels=[], namespace='default', resource_deps = [], deps=[], on_exist='ignore', force_repo_update=False):
+def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, labels=[], namespace='default', resource_deps = [], deps=[], on_exist='ignore', force_repo_update=False, args=""):
     """ 
     Install a Helm chart with the specified values file and name.
     """
@@ -46,11 +46,12 @@ def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, l
     deps = deps + [values_file]
     chart = chart or '.'
     
+    
     resource_name = 'helm_install_{}'.format(name)
     local_resource(
         resource_name,
-        cmd='helm upgrade --install {} {} --values {} --namespace {} --wait --timeout 5m'.format(
-            name, chart, values_file, namespace
+        cmd='helm upgrade --install {} {} --values {} --namespace {} --wait --timeout 5m {}'.format(
+            name, chart, values_file, namespace, args
         ),
         deps=deps,
         resource_deps=resource_deps,
