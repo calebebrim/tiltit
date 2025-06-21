@@ -111,7 +111,6 @@ spec:
 {service}
     """.format(
         name=name,
-        port=port,
         image=image,
         env=env_str,
         command=command_str,
