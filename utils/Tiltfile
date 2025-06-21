@@ -36,8 +36,9 @@ def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, l
             return
     deps = deps + [values_file]
     chart = chart or '.'
+    resource_name = 'helm_install_{}'.format(name)
     local_resource(
-        'helm_install_{}'.format(name),
+        resource_name,
         cmd='helm upgrade --install {} {} --values {} --namespace {}'.format(
             name, chart, values_file, namespace
         ),
@@ -49,6 +50,7 @@ def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, l
     watch_file(values_file)
     if chart != '.':
         watch_file(chart)
+    return resource_name
 
 def sts_yaml(name, image, ports=[], envs = {}, command=None, args=None, service_enabled=True, replicas=1):
     
