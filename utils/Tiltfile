@@ -50,7 +50,7 @@ def helm_install(values_file, name, chart=None, repo_url=None, labels=[], namesp
     if chart != '.':
         watch_file(chart)
 
-def sts_yaml(name, image, ports=[], envs = {}, command=None, args=None, service_enabled=True):
+def sts_yaml(name, image, ports=[], envs = {}, command=None, args=None, service_enabled=True, replicas=1):
     
     env_tpl = "env:{envs}"
     env_value_tpl= """\n            - name: {name}\n              value: {value}"""
@@ -92,7 +92,7 @@ kind: StatefulSet
 metadata:
   name: {name}
 spec:
-  replicas: 1
+  replicas: {replicas}
   selector:
     matchLabels:
       app: {name}
@@ -117,6 +117,7 @@ spec:
         args=args_str,
         service=service_str,
         ports=sts_ports_str,
+        replicas=str(replicas)
 
     ))
 
