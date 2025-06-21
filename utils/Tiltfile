@@ -55,8 +55,8 @@ def sts_yaml(name, image, port=8080, envs = {}, command=None, args=None):
     env_tpl = "env:{envs}"
     env_value_tpl= """\n            - name: {name}\n              value: {value}"""
     
-    command_str = "          command: [{}]".format(command) if command else ""
-    args_str = "          args: [{}]".format(args) if args else ""
+    command_str = "command: [{}]".format(command) if command else ""
+    args_str = "args: [{}]".format(args) if args else ""
 
     env_values_str = ""
     env_str = ""
