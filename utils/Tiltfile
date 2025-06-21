@@ -3,7 +3,7 @@ def listdir(path):
     files = str(b).split('\n')
     return files
 
-def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, labels=[], namespace='default', resource_deps = [], deps=[], on_exist='skip', force_repo_update=False):
+def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, labels=[], namespace='default', resource_deps = [], deps=[], on_exist='ignore', force_repo_update=False):
     """ 
     Install a Helm chart with the specified values file and name.
     """
@@ -36,13 +36,16 @@ def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, l
         if on_exist == 'skip':
           print('Helm release {} already exists, skipping installation.'.format(name))
           return
-        elif on_exist == 'replace':
+        elif on_exist == 'recreate':
           local('helm uninstall {}'.format(name))
+        elif on_exist == 'ignore':
+          pass
         else:
           fail('Unknown on_exist option: {}'.format(on_exist))
           return
     deps = deps + [values_file]
     chart = chart or '.'
+    
     resource_name = 'helm_install_{}'.format(name)
     local_resource(
         resource_name,
