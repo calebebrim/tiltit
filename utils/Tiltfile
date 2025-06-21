@@ -59,7 +59,7 @@ def sts_yaml(name, image, port=8080, envs = {}):
     env_values_str = ""
     env_str = ""
     if envs.keys():
-        env_vars_str = "\n".join([env_value_tpl.format(env, value) for env, value in envs.items()])
+        env_vars_str = "\n".join([env_value_tpl.format(name=env, value=value) for env, value in envs.items()])
         env_str = env_tpl.format(envs=env_vars_str)
 
 
