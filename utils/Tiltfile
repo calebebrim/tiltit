@@ -50,7 +50,7 @@ def helm_install(values_file, name, chart=None, repo_url=None, labels=[], namesp
     if chart != '.':
         watch_file(chart)
 
-def sts_yaml(name, image, port=8080, envs = {}, command=None, args=None, service_enabled=True):
+def sts_yaml(name, image, ports=[], envs = {}, command=None, args=None, service_enabled=True):
     
     env_tpl = "env:{envs}"
     env_value_tpl= """\n            - name: {name}\n              value: {value}"""
@@ -63,6 +63,16 @@ def sts_yaml(name, image, port=8080, envs = {}, command=None, args=None, service
     if envs.keys():
         env_vars_str = "\n".join([env_value_tpl.format(name=env, value=value) for env, value in envs.items()])
         env_str = env_tpl.format(envs=env_vars_str)
+    
+    # map ports
+    
+
+    container_ports_str = "\n".join(["            - containerPort: {port}".format(port=port) for port in ports])
+    sts_ports_str = """ports:\n{}""".format(container_ports_str) if ports else ""
+
+    svc_ports_str = "ports:\n{}".format("\n".join(["    - port: {port}\n      targetPort: {port}".format(port=port) for port in ports]))
+
+
 
     service_str = """
 ---
@@ -74,10 +84,8 @@ spec:
   type: ClusterIP
   selector:
     app: {name}
-  ports:
-    - port: {port}
-      targetPort: {port}
-    """.format(name=name, port=port) if service_enabled else ""
+  {ports}
+    """.format(name=name, ports=svc_ports_str) if service_enabled else ""
     return blob("""
 apiVersion: apps/v1
 kind: StatefulSet
@@ -96,8 +104,7 @@ spec:
       containers:
         - name: {name}
           image: {image}
-          ports:
-            - containerPort: {port}
+          {ports}
           {env}
           {command}
           {args}
@@ -109,7 +116,8 @@ spec:
         env=env_str,
         command=command_str,
         args=args_str,
-        service=service_str
+        service=service_str,
+        ports=sts_ports_str,
 
     ))
 
