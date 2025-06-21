@@ -104,6 +104,9 @@ spec:
         name=name,
         port=port,
         image=image,
-        env=env_str
+        env=env_str,
+        command=command_str,
+        args=args_str
+
     ))
 
