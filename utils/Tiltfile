@@ -3,7 +3,7 @@ def listdir(path):
     files = str(b).split('\n')
     return files
 
-def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, labels=[], namespace='default', resource_deps = [], deps=[], on_exist='ignore', force_repo_update=False, args=""):
+def helm_install(name, values_file=None, chart=None, repo_name=None, repo_url=None, labels=[], namespace='default', resource_deps = [], deps=[], on_exist='ignore', force_repo_update=False, args=""):
     """ 
     Install a Helm chart with the specified values file and name.
     """
@@ -43,15 +43,19 @@ def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, l
         else:
           fail('Unknown on_exist option: {}'.format(on_exist))
           return
-    deps = deps + [values_file]
     chart = chart or '.'
     
-    
+    values_file_str = ""
+    if values_file:
+      deps = deps + [values_file]
+      watch_file(values_file)
+      values_file_str="--values {}".format(values_file)
+
     resource_name = 'helm_install_{}'.format(name)
     local_resource(
         resource_name,
-        cmd='helm upgrade --install {} {} --values {} --namespace {} --wait --timeout 5m {}'.format(
-            name, chart, values_file, namespace, args
+        cmd='helm upgrade --install {} {} {} --namespace {} --wait --timeout 5m {}'.format(
+            name, chart, values_file_str, namespace, args
         ),
         deps=deps,
         resource_deps=resource_deps,
@@ -59,7 +63,6 @@ def helm_install(values_file, name, chart=None, repo_name=None, repo_url=None, l
     )
     print("local_resource created: {}".format(resource_name))
     
-    watch_file(values_file)
     if chart != '.':
         watch_file(chart)
     return resource_name
