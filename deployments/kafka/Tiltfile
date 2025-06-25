@@ -132,6 +132,6 @@ def install(labels=[], name='kafka'):
         new_name=name+"-cluster",
         objects=[name+"-cluster", name+'-nodepool:kafkanodepool'], 
         labels=labels,
-        resource_deps=["kafka-storage", "helm-strimzi-charts"]
+        resource_deps=["kafka-storage", "helm-strimzi-charts", "kafka-operator"]
     )
     k8s_resource('kafka-operator', labels=labels)
