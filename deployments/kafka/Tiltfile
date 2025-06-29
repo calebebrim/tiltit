@@ -117,12 +117,19 @@ spec:
     print(tmp)
   return blob(tmp)
 
-def install(labels=[], name='kafka'):
+def install(labels=[], name='kafka', options={}):
     helm_repo('helm-strimzi-charts', 'https://strimzi.io/charts/', labels=labels)
     helm_resource('kafka-operator', "strimzi/strimzi-kafka-operator", labels=labels)
+    storage_class_name = 'kafka-storage'
     
     k8s_yaml(kafka_yaml(name=name, storage_class_name="kafka-storage"))
-    k8s_yaml(kafka_storage_yaml(name, storage_class_name="kafka-storage", node_affinity=["kind-cluster-worker2"]))
+    
+    node_affinity = [""]
+    if options and ("kafka-storage" in options):
+      if "node-affinity" in options.get('kafka-storage'):
+        node_affinity = [options.get('kafka-storage').get("node-affinity")]
+    k8s_yaml(kafka_storage_yaml(name, storage_class_name="kafka-storage", node_affinity=node_affinity))
+
 
     k8s_resource(
         new_name=name+'-storage',
