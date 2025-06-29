@@ -141,6 +141,10 @@ spec:
 
 
 def update_tiltit_btn():
+  """
+  Adds a button to the Tilt UI to update Tiltit utilities.
+  """
+
   cmd_button('update ',
     argv=['curl -fsSL https://github.com/calebebrim/tiltit/raw/refs/heads/master/utils/update-tiltit-btn.sh | sh'],
     location=location.NAV,
