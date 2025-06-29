@@ -1,3 +1,6 @@
+load('ext://uibutton', 'cmd_button', 'bool_input', 'location')
+
+
 def listdir(path):
     b = local('ls {}'.format(path), quiet=True)
     files = str(b).split('\n')
