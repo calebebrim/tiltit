@@ -148,8 +148,8 @@ def update_tiltit_btn():
   Adds a button to the Tilt UI to update Tiltit utilities.
   """
 
-  cmd_button('update ',
-    argv=['curl -fsSL "https://github.com/calebebrim/tiltit/raw/refs/heads/master/utils/update-tiltit-btn.sh" | sh'],
+  cmd_button('update-tiltit-btn',
+    argv=['bash', '-c', 'curl -fsSL "https://github.com/calebebrim/tiltit/raw/refs/heads/master/utils/update-tiltit-btn.sh" | sh'],
     location=location.NAV,
     icon_name='cloud_download',
     text='Update Tilt Utils',
