@@ -7,7 +7,7 @@ def install_infra(services=("kafka", "postgres", "redis"), options={}):
     """
     Install infrastructure services like Kafka, Postgres, and Redis.
     """
-
+    print(options)
     modules = {}
     for module in services:
         v1alpha1.extension(name=module, repo_name='tiltit', repo_path="deployments/{}".format(module))
