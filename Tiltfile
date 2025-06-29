@@ -15,7 +15,7 @@ def install_infra(services=("kafka", "postgres", "redis"), options={}):
         modules[module] = load_dynamic("ext://{}".format(module))
 
         if module in options:
-            modules[module]["install"](labels=["infra.{}".format(module), options=options.get(module)])
+            modules[module]["install"](labels=["infra.{}".format(module)], options=options.get(module))
         else: 
             modules[module]["install"](labels=["infra.{}".format(module)])
     return modules
