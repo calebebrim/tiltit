@@ -1,1 +1,0 @@
-cd ~/.local/share/tilt-dev/tilt_modules/github.com/calebebrim/tiltit && git pull && echo "tiltit pull completed"
