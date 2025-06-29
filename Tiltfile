@@ -13,7 +13,7 @@ def install_infra(services=("kafka", "postgres", "redis"), options={}):
         v1alpha1.extension(name=module, repo_name='tiltit', repo_path="deployments/{}".format(module))
 
         modules[module] = load_dynamic("ext://{}".format(module))
-
+        print("installing infra module: {}".format(module))
         if module in options:
             print("module {} options: {}".format(module, options.get(module)))
             modules[module]["install"](labels=["infra.{}".format(module)], options=options.get(module))
